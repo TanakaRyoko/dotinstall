@@ -1,97 +1,91 @@
 'use strict';
 {
     
-   const question = document.getElementById('question');
-   const choices = document.getElementById('choices');
-   const btn = document.getElementById('btn');
-   const result = document.getElementById('result');
-   const scoreLabel = document.querySelector('#result > p');
-   
-   const quizSet = shuffle([
-       {q: '世界で一番大きな湖は？?' , c: ['カスピ海', 'カリブ海' , '琵琶湖']},
-       {q: '２の８乗は?' , c: ['256', '64' , '1024']},
-       {q: '次のうち、最初にリリースされた言語は?' , c: ['python', 'javascript' , 'HTML']},
+   const images = [
+       'img/pic00.png',
+       'img/pic01.png',
+       'img/pic02.png',
+       'img/pic03.png',
+       'img/pic04.png',
+       'img/pic05.png',
+       'img/pic06.png',
+       'img/pic07.png',
+        ];
+              
+    //   今何番目の画像を表示しているかの変数⇓
+       let currentIndex = 0;
        
-       ]);
+    //   メイン表示する領域⇓
+       const mainImage = document.getElementById('main');
+       mainImage.src = images[currentIndex];
        
-       let currentNum = 0;
-       let isAnswered;
-       let score = 0;
        
-       function shuffle(arr) {
-           for(let i = arr.length - 1; i > 0; i--) {
-               const j = Math.floor(Math.random() * (i + 1));
-               [arr[j], arr[i]] = [arr[i], arr[j]];
-           }
-           return arr;
-       }
-       
-    //   配列の0番目にすべて正解が入っている
-    
-       function checkAnswer(li) {
-        //   if(isAnswered === true){
-        if(isAnswered) {
-            return;
-        }
-        isAnswered = true;
-        
-           if (li.textContent === quizSet[currentNum].c[0]) {
-            //   console.log('correct')
-            li.classList.add('correct');
-            score++;
-            
-           } else {
-            //   console.log('wrong');
-                li.classList.add('wrong');
-           }
-           btn.classList.remove('disabled');
-        }
-        
-        function setQuiz() {
-            isAnswered = false;
-            
-            question.textContent = quizSet[currentNum].q;
-            
-            while (choices.firstChild) {
-                choices.removeChild(choices.firstChild);
-            }
-            
-            const shuffledChoices = shuffle([...quizSet[currentNum].c]);
-    //   console.log(quizSet[currentNum].c);
-       shuffledChoices.forEach(choice => {
+       images.forEach((image, index) => {
+                // 何番目のイメージか↑
+           const img =document.createElement('img');
+           img.src = image;
+           
            const li = document.createElement('li');
-           li.textContent = choice;
-           li.addEventListener('click' , () => {
-               checkAnswer(li);
+           if(index === currentIndex) {
+               li.classList.add('current');
+           } 
+           li.addEventListener('click', () => {
+               mainImage.src = image;
+               const thumbnails = document.querySelectorAll('.thumbnails > li');
+               thumbnails[currentIndex].classList.remove('current');
+               currentIndex = index;
+               thumbnails[currentIndex].classList.add('current');
            });
-           choices.appendChild(li);
+           li.appendChild(img);
+           document.querySelector('.thumbnails').appendChild(li);
        });
        
-       if(currentNum === quizSet.length - 1) {
-           btn.textContent = 'Show Score';
+          const next = document.getElementById('next');
+          next.addEventListener('click', ()=> {
+              let target = currentIndex + 1 ;
+              if(target === images.length) {
+                  target = 0;
+              }
+              document.querySelectorAll('.thumbnails > li')[target].click();
+          
+       });
+       
+       
+       
+       const prev = document.getElementById('prev');
+       prev.addEventListener('click',()=> {
+           let target = currentIndex -1;
+           if(target < 0) {
+               target = images.length -1;
+           }
+           document.querySelectorAll('.thumbnails > li')[target].click();
+       });
+       
+       let timeoutId;
+       
+       function playSlideshow(){
+           timeoutId = setTimeout(() => {
+               next.click();
+               playSlideshow();
+           },1000);
+           
        }
-            
-    }
-    
-    setQuiz();
-    
-    btn.addEventListener('click' ,() => {
-        if (btn.classList.contains('disabled')){
-            return;
-        }
-        btn.classList.add('disabled');
-        
-        if(currentNum === quizSet.length -1) {
-            // console.log(`Score:${score} / ${quizSet.length}`);
-            scoreLabel.textContent =`Score: ${score} / ${quizSet.length}`;
-            result.classList.remove('hidden');
-        } else {
-        
-        currentNum++;
-        setQuiz();
-        }
-    });
-    
+       
+       let isPlaying = false;
+       
+       const play = document.getElementById('play');
+       play.addEventListener('click',() => {
+           if(isPlaying === false) {
+           playSlideshow();
+           play.textContent ='pause';
+           } else {
+               clearTimeout(timeoutId);
+               play.textContent = 'Play';
+           }
+           
+           isPlaying = !isPlaying;
+       });
+       
 }   
        
    
